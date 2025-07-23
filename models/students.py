@@ -5,10 +5,10 @@ class Student(db.Model):
     # Name Table
     # __tablename__ = "students"
     # Define Primary Key Attribute
-    student_id = db.Column(db.Integer, priamry_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     # Non-Attributes
     name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), nullable=False, unqiue=True)
+    email = db.Column(db.String(100), nullable=False, unique=True)
     address = db.Column(db.String(100))
 
 class StudentSchema(SQLAlchemyAutoSchema):

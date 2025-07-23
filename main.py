@@ -1,4 +1,5 @@
 from flask import Flask
+from controllers.cli_controller import db_commands
 from init import db
 import os
 
@@ -9,5 +10,8 @@ def create_app():
 
     # Initialise SQL Database
     db.init_app(app)
+
+    # Register Blueprint
+    app.register_blueprint(db_commands)
 
     return app 
