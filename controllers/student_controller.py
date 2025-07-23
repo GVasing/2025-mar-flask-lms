@@ -39,5 +39,26 @@ def get_a_student(student_id):
     else:
         return {"message":f"Student with id {student_id} not found."}, 404
 # POST /
+@student_bp.route("/", methods=["POST"])
+def create_a_student():
+    # GET info from the request body
+    body_data = request.get_json()
+    # Create a Student Object from Student class/model with body response data
+    new_student = Student(
+        name=body_data.get("name"),
+        email=body_data.get("email"),
+        address=body_data.get("address")
+    )
+    # Add new student data to session
+    db.session.add(new_student)
+    # Commit the session
+    db.session.commit()
+    # Return
+    return jsonify(student_schema.dump(new_student)), 201
 # PUT/PATCH /id
+# @student_bp.route("/<int:id>", methods=["PUT"])
+# def edit_a_student():
+
 # DELETE /id
+# @student_bp.route("/<int:id>", methods=["DELETE"])
+# def delete_a_student():
