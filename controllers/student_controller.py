@@ -68,9 +68,43 @@ def create_a_student():
         else:
             return {"message": "Unexpected Error Occured"}, 400
 # PUT/PATCH /id
-# @student_bp.route("/<int:id>", methods=["PUT"])
-# def edit_a_student():
+@student_bp.route("/<int:id>", methods=["PUT", "PATCH"])
+def update_student(student_id):
+    # Define GET Statement
+    stmt = db.select(Student).where(Student.id == student_id)
+
+    # Execute statement
+    student = db.session.scalar(stmt)
+
+    # If/Elif/Else Conditions
+    if student:
+        # Retrieve 'student' data
+        body_data = request.get_json()
+        # Specify changes
+        student.name = body_data.get("name") or student.name
+        student.email = body_data.get("email") or student.email
+        student.address = body_data.get("address") or student.address
+        # Commit changes
+        db.session.commit()
+        # Return data
+        return jsonify(student_schema.dump(student))
+    else:
+        return {"message": f"Student with id {student_id} does not exist/cannot be found."}, 404
 
 # DELETE /id
-# @student_bp.route("/<int:id>", methods=["DELETE"])
-# def delete_a_student():
+@student_bp.route("/<int:id>", methods=["DELETE"])
+def delete_a_student(student_id):
+        # Find the student with the student_id
+    stmt = db.select(Student).where(Student.id == student_id)
+    student = db.session.scalar(stmt)
+    # if exists
+    if student:
+        # delete the student entry
+        db.session.delete(student)
+        db.session.commit()
+
+        return {"message": f"Student '{student.name}' has been removed successfully."}, 200
+    # else:
+    else:
+        # return an acknowledgement message
+        return {"message": f"Student with id '{student_id}' does not exist"}, 404
