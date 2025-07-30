@@ -11,8 +11,12 @@ teacher_bp = Blueprint("teacher", __name__, url_prefix="/teachers")
 # GET /
 @teacher_bp.route("/")
 def get_teachers():
+    department = request.args.get("department")
+    if department:
+        stmt = db.select(Teacher).where(Teacher.department == department)
+    else:
     # Define GET statement
-    stmt = db.select(Teacher)
+        stmt = db.select(Teacher)
     # Execute it
     teachers_list = db.session.scalars(stmt) # Python Object
     # Serialise
