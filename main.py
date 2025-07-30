@@ -12,6 +12,9 @@ def create_app():
 
     # Initialise SQL Database
     db.init_app(app)
+    
+    # Specify auto sort of keys/attributes to be disabled when GET is requested
+    app.json.sort_keys = False
 
     # Register Blueprint
     app.register_blueprint(db_commands)

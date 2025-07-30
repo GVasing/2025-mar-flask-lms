@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from init import db
-from models.teachers import Teacher, teacher_schema, teachers_schema
+from models.teachers import Teacher
 from psycopg2 import errorcodes
+from schemas.schemas import teacher_schema, teachers_schema
 
 teacher_bp = Blueprint("teacher", __name__, url_prefix="/teachers")
 
@@ -15,7 +16,7 @@ def get_teachers():
     # Execute it
     teachers_list = db.session.scalars(stmt) # Python Object
     # Serialise
-    data = teacher_schema.dump(teachers_list) # JSON Object
+    data = teachers_schema.dump(teachers_list) # JSON Object
     # Error Handling and Return
     if data:
         return jsonify(data)
