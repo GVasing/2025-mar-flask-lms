@@ -28,6 +28,7 @@ class CourseSchema(SQLAlchemyAutoSchema):
         load_instance = True
         include_fk = True
         include_relationships = True
+        ordered = True
         fields = ("id", "name", "duration", "teacher")
 
     # name = fields.String(required=True, validate=And(
