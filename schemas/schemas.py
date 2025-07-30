@@ -46,10 +46,12 @@ student_schema = StudentSchema()
 # Student Schema for converting multiple entries
 students_schema = StudentSchema(many=True)
 
-# Student Schema for converting a single entry
+# Teacher Schema for converting a single entry
 teacher_schema = TeacherSchema()
-# Student Schema for converting multiple entries
+# Teacher Schema for converting multiple entries
 teachers_schema = TeacherSchema(many=True)
 
+# Course Schema for converting a single entry
 course_schema = CourseSchema()
+# Course Schema for converting a multiple entry
 courses_schema = CourseSchema(many=True)
