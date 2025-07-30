@@ -13,10 +13,10 @@ teacher_bp = Blueprint("teacher", __name__, url_prefix="/teachers")
 def get_teachers():
     department = request.args.get("department")
     if department:
-        stmt = db.select(Teacher).where(Teacher.department == department)
+        stmt = db.select(Teacher).where(Teacher.department == department).order_by(Teacher.id)
     else:
     # Define GET statement
-        stmt = db.select(Teacher)
+        stmt = db.select(Teacher).order_by(Teacher.id)
     # Execute it
     teachers_list = db.session.scalars(stmt) # Python Object
     # Serialise
@@ -53,7 +53,7 @@ def create_a_teacher():
         # Create a Teacher Object from Teacher class/model with body response data
         new_teacher = Teacher(
             name=body_data.get("name"),
-            email=body_data.get("email"),
+            department=body_data.get("department"),
             address=body_data.get("address")
         )
         # Add new teacher data to session
@@ -72,7 +72,7 @@ def create_a_teacher():
         # else:
         #     return {"message": "Unexpected Error Occured"}, 400
 # PUT/PATCH /id
-@teacher_bp.route("/<int:id>", methods=["PUT", "PATCH"])
+@teacher_bp.route("/<int:teacher_id>", methods=["PUT", "PATCH"])
 def update_teacher(teacher_id):
     # Define GET Statement
     stmt = db.select(Teacher).where(Teacher.id == teacher_id)
@@ -96,7 +96,7 @@ def update_teacher(teacher_id):
         return {"message": f"Teacher with id {teacher_id} does not exist/cannot be found."}, 404
 
 # DELETE /id
-@teacher_bp.route("/<int:id>", methods=["DELETE"])
+@teacher_bp.route("/<int:teacher_id>", methods=["DELETE"])
 def delete_a_teacher(teacher_id):
         # Find the teacher with the teacher_id
     stmt = db.select(Teacher).where(Teacher.id == teacher_id)
