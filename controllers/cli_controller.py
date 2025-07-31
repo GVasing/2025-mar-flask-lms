@@ -3,6 +3,7 @@ from init import db
 from models.students import Student
 from models.teachers import Teacher
 from models.course import Course
+from models.enrolment import Enrolment
 
 # Define/Create a blueprint of 'app'
 db_commands = Blueprint("db", __name__)

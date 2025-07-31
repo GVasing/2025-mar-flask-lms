@@ -5,11 +5,15 @@ from marshmallow import fields
 from models.students import Student
 from models.teachers import Teacher
 from models.course import Course
+from models.enrolment import Enrolment
 
 class StudentSchema(SQLAlchemyAutoSchema):
     class Meta:
         model = Student
         load_instance = True
+        include_relationships = True
+
+    enrolments = fields.List(fields.Nested("EnrolmentSchema", exclude=("student",)))
 
 class TeacherSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -39,7 +43,18 @@ class CourseSchema(SQLAlchemyAutoSchema):
     # duration = fields.Float(allow_nan=False, required=False)
 
     teacher = fields.Nested("TeacherSchema", only=("id", "name", "department"))
+    enrolments = fields.List(fields.Nested("EnrolmentSchema", exclude=("course",)))
 
+class EnrolmentSchema(SQLAlchemyAutoSchema):
+    class Meta:
+        model = Enrolment
+        load_instance = True
+        include_relationships = True
+        include_fk = True
+        # ordered = True
+
+    student = fields.Nested("StudentSchema", only=("id", "name"))
+    course = fields.Nested("CourseSchema", only=("id", "name"))
 
 # Student Schema for converting a single entry
 student_schema = StudentSchema()
@@ -55,3 +70,8 @@ teachers_schema = TeacherSchema(many=True)
 course_schema = CourseSchema()
 # Course Schema for converting a multiple entry
 courses_schema = CourseSchema(many=True)
+
+# Enrolment Schema for converting a single entry
+enrolment_schema = EnrolmentSchema()
+# Enrolment Schema for converting a multiple entry
+enrolments_schema = EnrolmentSchema(many=True)
