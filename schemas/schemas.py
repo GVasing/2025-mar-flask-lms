@@ -12,8 +12,10 @@ class StudentSchema(SQLAlchemyAutoSchema):
         model = Student
         load_instance = True
         include_relationships = True
+        fields = ("id", "name", "email", "address", "enrolments")
+        ordered = True
 
-    enrolments = fields.List(fields.Nested("EnrolmentSchema", exclude=("student",)))
+    enrolments = fields.List(fields.Nested("EnrolmentSchema", only=("id", "enrolment_date", "course")))
 
 class TeacherSchema(SQLAlchemyAutoSchema):
     class Meta:
@@ -33,7 +35,7 @@ class CourseSchema(SQLAlchemyAutoSchema):
         include_fk = True
         include_relationships = True
         ordered = True
-        fields = ("id", "name", "duration", "teacher")
+        fields = ("id", "name", "duration", "teacher", "enrolments")
 
     # name = fields.String(required=True, validate=And(
     #     Length(min=2, error="Course name must be at least two characters long"),  
@@ -51,7 +53,8 @@ class EnrolmentSchema(SQLAlchemyAutoSchema):
         load_instance = True
         include_relationships = True
         include_fk = True
-        # ordered = True
+        ordered = True
+        fields = ("id", "enrolment_date", "student_id", "course_id", "student", "course")
 
     student = fields.Nested("StudentSchema", only=("id", "name"))
     course = fields.Nested("CourseSchema", only=("id", "name"))
