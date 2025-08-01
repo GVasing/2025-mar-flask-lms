@@ -87,6 +87,20 @@ def update_course(course_id):
             course.name = body_data.get("name") or course.name
             course.duration = body_data.get("duration") or course.duration
             course.teacher_id = body_data.get("teacher_id") or course.teacher_id
+
+            # validate the changes to the course
+            validation_result = course_schema.validate(
+                {
+                    "name": course.name,
+                    "duration": course.duration
+                },
+                session=db.session
+            )
+            # If validation result has truthy value, validation errors have occured
+            print(validation_result)
+            if validation_result:
+                return jsonify(validation_result), 400
+
             # Commit changes
             db.session.commit()
             # Return data

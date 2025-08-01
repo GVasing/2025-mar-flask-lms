@@ -1,7 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from marshmallow import fields
 from marshmallow.validate import Length, And, Regexp
-from marshmallow import fields
+from marshmallow import validates, ValidationError, fields
 from models.students import Student
 from models.teachers import Teacher
 from models.course import Course
@@ -36,6 +35,15 @@ class CourseSchema(SQLAlchemyAutoSchema):
         include_relationships = True
         ordered = True
         fields = ("id", "name", "duration", "teacher", "enrolments")
+
+    # @validates("property-to-validate")
+    # def some_function_name(self, property-to-validate, data_key)
+    @validates("name")
+    def validates_name(self, name, data_key):
+        if len(name) < 2:
+            print("Course name is too short")
+            raise ValidationError("Course name is too short")
+        
 
     # name = fields.String(required=True, validate=And(
     #     Length(min=2, error="Course name must be at least two characters long"),  

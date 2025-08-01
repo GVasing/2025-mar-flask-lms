@@ -102,8 +102,8 @@ def update_enrolment(enrolment_id):
         return {"message": f"Enrolment with id {enrolment_id} does not exist/cannot be found."}, 404
 
 # # DELETE /id
-# @enrolment_bp.route("/<int:enrolment_id>", methods=["DELETE"])
-# def delete_a_enrolment(enrolment_id):
+@enrolment_bp.route("/<int:enrolment_id>", methods=["DELETE"])
+def delete_a_enrolment(enrolment_id):
     # Find the enrolment with the enrolment_id
     stmt = db.select(Enrolment).where(Enrolment.id == enrolment_id)
     enrolment = db.session.scalar(stmt)
