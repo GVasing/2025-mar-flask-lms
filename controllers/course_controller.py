@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 
 from sqlalchemy.exc import IntegrityError, DataError
 from psycopg2 import errorcodes
+from marshmallow import ValidationError
 
 from init import db
 from models.course import Course
@@ -46,20 +47,35 @@ def get_a_course(course_id):
 @course_bp.route("/", methods=["POST"])
 def create_a_course():
     try:
-        # GET info from the request body
-        body_data = request.get_json()
-        # Create a Course Object from Course class/model with body response data
-        new_course = Course(
-            name=body_data.get("name"),
-            duration=body_data.get("duration"),
-            teacher_id = body_data.get("teacher_id")
+        # # GET info from the request body
+        # body_data = request.get_json()
+        # # Create a Course Object from Course class/model with body response data
+        # new_course = Course(
+        #     name=body_data.get("name"),
+        #     duration=body_data.get("duration"),
+        #     teacher_id = body_data.get("teacher_id")
+        # )
+        # # Add new course data to session
+        # db.session.add(new_course)
+        # # Commit the session
+        # db.session.commit()
+
+        new_course = course_schema.load(
+            request.get_json(),
+            session = db.session   
         )
+
         # Add new course data to session
         db.session.add(new_course)
         # Commit the session
         db.session.commit()
+
         # Return
         return jsonify(course_schema.dump(new_course)), 201
+    
+    except ValidationError as err:
+        return err.messages, 400
+    
     except IntegrityError as err:
         if err.orig.pgcode == errorcodes.NOT_NULL_VIOLATION:
             return {"message":f"Required field {err.orig.diag.column_name} cannot be null"}, 400
@@ -72,50 +88,84 @@ def create_a_course():
 # PUT/PATCH /id
 @course_bp.route("/<int:course_id>", methods=["PUT", "PATCH"])
 def update_course(course_id):
+    stmt = db.select(Course).where(Course.id == course_id)
+
+    # Execute statement
+    course = db.session.scalar(stmt)
+
+    if not course:
+        return {"message": f"Course with id {course_id} does not exist."}, 404
+    
     try:
-        # Define GET Statement
-        stmt = db.select(Course).where(Course.id == course_id)
-
-        # Execute statement
-        course = db.session.scalar(stmt)
-
-        # If/Elif/Else Conditions
-        if course:
-            # Retrieve 'course' data
-            body_data = request.get_json()
-            # Specify changes
-            course.name = body_data.get("name") or course.name
-            course.duration = body_data.get("duration") or course.duration
-            course.teacher_id = body_data.get("teacher_id") or course.teacher_id
-
-            # validate the changes to the course
-            validation_result = course_schema.validate(
-                {
-                    "name": course.name,
-                    "duration": course.duration
-                },
-                session=db.session
+        updated_course = course_schema.load(
+                request.get_json(),
+                instance = course,
+                session = db.session,
+                partial = True
             )
-            # If validation result has truthy value, validation errors have occured
-            print(validation_result)
-            if validation_result:
-                return jsonify(validation_result), 400
-
-            # Commit changes
-            db.session.commit()
-            # Return data
-            return jsonify(course_schema.dump(course))
-        else:
-            return {"message": f"Course with id {course_id} does not exist/cannot be found."}, 404
+        db.session.commit()
+        return course_schema.dump(updated_course), 200
+    
+    except ValidationError as err:
+        return err.messages, 400
     except IntegrityError as err:
-        if err.orig.pgcode == errorcodes.UNIQUE_VIOLATION:
-            return {"message": "Course Name must be unique"}, 400
-        
-        else:
-            return {"message": "Unexpected Error Occured"}, 400
+        return {"message": "Unexpected Error Occured.  Possible a duplicated name or invalid foreign key."}, 400
     except DataError as err:
-    #     # if err.orig.
         return {"message" : err.orig.diag.message_primary}, 400
+
+    # try:
+    #     # Define GET Statement
+    #     stmt = db.select(Course).where(Course.id == course_id)
+
+    #     # Execute statement
+    #     course = db.session.scalar(stmt)
+    #     # If/Elif/Else Conditions
+    #     if course:
+    #         # # Retrieve 'course' data
+    #         # body_data = request.get_json()
+    #         # # Specify changes
+    #         # course.name = body_data.get("name") or course.name
+    #         # course.duration = body_data.get("duration") or course.duration
+    #         # course.teacher_id = body_data.get("teacher_id") or course.teacher_id
+
+    #         # # validate the changes to the course
+    #         # validation_result = course_schema.validate(
+    #         #     {
+    #         #         "name": course.name,
+    #         #         "duration": course.duration
+    #         #     },
+    #         #     session=db.session
+    #         # )
+    #         # # If validation result has truthy value, validation errors have occured
+    #         # print(validation_result)
+    #         # if validation_result:
+    #         #     return jsonify(validation_result), 400
+
+    #         updated_course = course_schema.load(
+    #             request.get_json(),
+    #             instance = course,
+    #             session = db.session,
+    #             partial = True
+    #         )
+
+    #         # Commit changes
+    #         db.session.commit()
+    #         # Return data
+    #         return jsonify(course_schema.dump(updated_course))
+    #     else:
+    #         return {"message": f"Course with id {course_id} does not exist/cannot be found."}, 404
+    # except ValidationError as err:
+    #     return err.messages, 400    
+    
+    # except IntegrityError as err:
+    #     if err.orig.pgcode == errorcodes.UNIQUE_VIOLATION:
+    #         return {"message": "Course Name must be unique"}, 400
+        
+    #     else:
+    #         return {"message": "Unexpected Error Occured"}, 400
+    # except DataError as err:
+    # #     # if err.orig.
+    #     return {"message" : err.orig.diag.message_primary}, 400
 
 # DELETE /id
 @course_bp.route("/<int:course_id>", methods=["DELETE"])
