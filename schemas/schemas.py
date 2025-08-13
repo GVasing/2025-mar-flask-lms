@@ -37,7 +37,7 @@ class CourseSchema(SQLAlchemyAutoSchema):
         include_fk = True
         include_relationships = True
         ordered = True
-        fields = ("id", "name", "duration", "teacher", "enrolments")
+        fields = ("id", "name", "duration", "teacher", "enrolments", "teacher_id")
 
     duration = auto_field(validate=[
         Range(min=0.01, error="Duration must be at least greater than zero.")
